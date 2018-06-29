@@ -72,7 +72,7 @@ class WebSocket(object):
         sockopt must be tuple and each element is argument of sock.setsockopt.
     sslopt: dict object for ssl socket option.
     fire_cont_frame: fire recv event for each cont frame. default is False
-    enable_multithread: if set to True, lock send method.
+    enable_multithread: if set to True, lock send and recv methods.
     skip_utf8_validation: skip utf8 validation.
     """
 

@@ -175,7 +175,8 @@ class WebSocketApp(object):
                     http_proxy_host=None, http_proxy_port=None,
                     http_no_proxy=None, http_proxy_auth=None,
                     skip_utf8_validation=False,
-                    host=None, origin=None, dispatcher=None):
+                    host=None, origin=None, dispatcher=None,
+                    enable_multithread=False):
         """
         run event loop for WebSocket framework.
         This loop is infinite loop and is alive during websocket is available.
@@ -193,6 +194,8 @@ class WebSocketApp(object):
         skip_utf8_validation: skip utf8 validation.
         host: update host header.
         origin: update origin header.
+        enable_multithread: if set to True, lock the underlying send and recv
+            methods. note: this is set to True if ping_interval is specified.
         """
 
         if not ping_timeout or ping_timeout <= 0:
@@ -205,6 +208,8 @@ class WebSocketApp(object):
             sslopt = {}
         if self.sock:
             raise WebSocketException("socket is already opened")
+        if ping_interval:
+            enable_multithread = True
         thread = None
         close_frame = None
         self.keep_running = True
@@ -226,7 +231,8 @@ class WebSocketApp(object):
             self.sock = WebSocket(
                 self.get_mask_key, sockopt=sockopt, sslopt=sslopt,
                 fire_cont_frame=self.on_cont_message and True or False,
-                skip_utf8_validation=skip_utf8_validation)
+                skip_utf8_validation=skip_utf8_validation,
+                enable_multithread=enable_multithread)
             self.sock.settimeout(getdefaulttimeout())
             self.sock.connect(
                 self.url, header=self.header, cookie=self.cookie,
